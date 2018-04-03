@@ -37,6 +37,6 @@ namespace multas.Models
         //FK para a tabela Agentes
         [ForeignKey("Agente")]
         public int AgenteFK { get; set; }
-        public virtual Viaturas Agente { get; set; }
+        public virtual Agentes Agente { get; set; }
     }
 }
