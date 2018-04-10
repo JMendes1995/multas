@@ -22,9 +22,9 @@ namespace multas.Models
 
         //dados do dono da viatura
         public string NomeDono { get; set; }
-        public string Morada { get; set; }
+        public string MoradaDono { get; set; }
         public string CodPostalDono { get; set; }
-        public DateTime DataValidadeCarta { get; set; }
+       
 
         //referencia as multas q um condutor 'recebe' numa viatura
         public virtual ICollection <Multas> ListaDeMultas { get; set; }

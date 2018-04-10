@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -59,21 +60,52 @@ namespace multas.Controllers
         [HttpPost]
         //anotador para proteção por roubo de identidade
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Nome,Esquadra,Fotografia")] Agentes agentes)
+        public ActionResult Create([Bind(Include = "Nome,Esquadra")] Agentes agente,HttpPostedFileBase uploadFotografia)
         {
             // escreve os dados ne um novo agente na BD
+            //especificar o id do novo agente
+            int idNovoAgente=db.Agentes.Max(a=>a.ID)+1;
+            //guardar o id
+            agente.ID = idNovoAgente;
+            //especificar o nome do ficheiro 
+            string nomeImg = "agente_"+idNovoAgente+".jpg";
+            //validar se  a imagem foi fornecida
+            //var aux
+            var path = "";
+            if (uploadFotografia != null)
+            {
+                //o ficheiro foi fornecido
+                //validar se é uma img
+                //formatar o tamanho da imagem 
+                //criar o caminhao completo até ao sitio onde o ficheiro sera guardado
+                path = Path.Combine(Server.MapPath("~/imagens/imagens/"),nomeImg);
+                //guardar o ficheiro
+                agente.Fotografia = nomeImg;
+            }
+            else
+            {
+                //n foi fornecido qq ficheiro
+                ModelState.AddModelError("","nao foi fornecido uma imagem...");
+                //devolver o controlo a view 
+                return View(agente);
+            }
+            
+                
             //ModelState.IsValid -> confronta os dados fornecidos da view 
            
             if (ModelState.IsValid)
             {
                 //adiciona o agente à tabela agentes 
-                db.Agentes.Add(agentes);
+                db.Agentes.Add(agente);
                 //faz commit 
                 db.SaveChanges();
+                //escrever o ficheiro com a fotografia no disco rigido na pasta 'imagens '
+                uploadFotografia.SaveAs(path);
+
                 return RedirectToAction("Index");
             }
 
-            return View(agentes);
+            return View(agente);
         }
 
         // GET: Agentes/Edit/5

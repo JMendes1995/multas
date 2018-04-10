@@ -15,8 +15,8 @@ namespace multas.Models
         public int ID { get; set; }//PK
         public string Infracao { get; set; }
         public string LocalDaMulta { get; set; }
-        public decimal Multa { get; set; }
-        public DateTime DateDaMulta { get; set; }
+        public decimal ValorMulta { get; set; }
+        public DateTime DataDaMulta { get; set; }
         public string Cor { get; set; }
 
         //********************************************************************

@@ -17,7 +17,7 @@ namespace multas.Models
         public int ID { get; set; }//PK
         public string Nome { get; set; }
         public string BI { get; set; }
-        public DateTime DataNasc { get; set; }
+        public DateTime DataNascimento { get; set; }
         public string Telemovel { get; set; }
         public string NumCartaConducao { get; set; }
         public string LocalEmissao { get; set; }
