@@ -86,7 +86,20 @@ namespace multas.Controllers
         {
             // escreve os dados ne um novo agente na BD
             //especificar o id do novo agente
-            int idNovoAgente=db.Agentes.Max(a=>a.ID)+1;
+            //testar se ja registoss
+            //if(db.Agentes.Count() != 0){        }
+
+            int idNovoAgente = 0;
+            try
+            {
+                idNovoAgente = db.Agentes.Max(a => a.ID) + 1;
+            }
+            catch (Exception)
+            {
+
+                idNovoAgente=1;
+            }
+    
             //guardar o id
             agente.ID = idNovoAgente;
             //especificar o nome do ficheiro 
@@ -117,6 +130,10 @@ namespace multas.Controllers
            
             if (ModelState.IsValid)
             {
+                try
+                {
+
+      
                 //adiciona o agente à tabela agentes 
                 db.Agentes.Add(agente);
                 //faz commit 
@@ -125,8 +142,14 @@ namespace multas.Controllers
                 uploadFotografia.SaveAs(path);
 
                 return RedirectToAction("Index");
-            }
+                 
+                }
+                catch (Exception)
+                {
 
+                    ModelState.AddModelError("", "houve um erro");
+                }
+            } 
             return View(agente);
         }
 
