@@ -257,11 +257,22 @@ namespace multas.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Agentes agentes = db.Agentes.Find(id);
-            //remove o agente 
-            db.Agentes.Remove(agentes);
-            //commit
-            db.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                //remove o agente 
+                db.Agentes.Remove(agentes);
+                //commit
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+
+               ModelState.AddModelError("", string.Format("houve um erro nº {0}-{1}",id, agentes.Nome));
+                
+            }
+            //se cheguei aqui é pqhouve um prob
+            return View(agentes);
         }
 
         protected override void Dispose(bool disposing)
