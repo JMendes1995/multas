@@ -21,29 +21,44 @@ namespace multas.Controllers
         {
             //db.Agentes.ToList() -> select * from Agentes;
             //enviar para a view uma lista com todos os agentes da base de dados
-            return View(db.Agentes.ToList());
+            var listaDeAgentes=db.Agentes.ToList().OrderBy(a=>a.Nome);
+            return View(listaDeAgentes);
         }
 
         // GET: Agentes/Details/5
         //int? id -> o id pode ser null
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ActionResult Details(int? id)
         {
             // proteção para o caso de nao ter sido fornecido um ID valido 
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                //instrução original
+                //devolve um erro q n há id
+                //logo n e possivel pesquisar por um agente
+                //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+                //redirecionar para uma pagina que controlamos
+                return RedirectToAction("Index");
+
             }
 
             // procura na BD, i agente cujo o ID foi Fornecido
-            Agentes agentes = db.Agentes.Find(id);
+            Agentes agente = db.Agentes.Find(id);
             //proteção para o caso de não ter sido encontrado qq agente
             //que tenha o ID fornecido
-            if (agentes == null)
+            if (agente == null)
             {
-                return HttpNotFound();
+                //n foi encontrado o agente
+                // return HttpNotFound();
+                return RedirectToAction("Index");
             }
             //entrega a view os dados do agente encontrado
-            return View(agentes);
+            return View(agente);
         }
 
         // GET: Agentes/Create
@@ -57,6 +72,13 @@ namespace multas.Controllers
         // POST: Agentes/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="agente"></param>
+            /// <param name="uploadFotografia"></param>
+            /// <returns></returns>
         [HttpPost]
         //anotador para proteção por roubo de identidade
         [ValidateAntiForgeryToken]
@@ -109,23 +131,50 @@ namespace multas.Controllers
         }
 
         // GET: Agentes/Edit/5
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public ActionResult Edit(int? id)
         {
+
+            // proteção para o caso de nao ter sido fornecido um ID valido 
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                //instrução original
+                //devolve um erro q n há id
+                //logo n e possivel pesquisar por um agente
+                //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+                //redirecionar para uma pagina que controlamos
+                return RedirectToAction("Index");
+
             }
-            Agentes agentes = db.Agentes.Find(id);
-            if (agentes == null)
+
+            // procura na BD, i agente cujo o ID foi Fornecido
+            Agentes agente = db.Agentes.Find(id);
+            //proteção para o caso de não ter sido encontrado qq agente
+            //que tenha o ID fornecido
+            if (agente == null)
             {
-                return HttpNotFound();
+                //n foi encontrado o agente
+                // return HttpNotFound();
+                return RedirectToAction("Index");
             }
-            return View(agentes);
+            //entrega a view os dados do agente encontrado
+            return View(agente);
         }
 
         // POST: Agentes/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="agentes"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes)
@@ -143,18 +192,40 @@ namespace multas.Controllers
         }
 
         // GET: Agentes/Delete/5
+        /// <summary>
+        /// apresenta na view os dados de um agente com vista  à sua, eventual, 
+        /// eliminação
+        /// </summary>
+        /// <param name="id">identificador doo agente</param>
+        /// <returns></returns>
         public ActionResult Delete(int? id)
         {
+
+            // proteção para o caso de nao ter sido fornecido um ID valido 
             if (id == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                //instrução original
+                //devolve um erro q n há id
+                //logo n e possivel pesquisar por um agente
+                //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+                //redirecionar para uma pagina que controlamos
+                return RedirectToAction("Index");
+
             }
-            Agentes agentes = db.Agentes.Find(id);
-            if (agentes == null)
+
+            // procura na BD, o agente cujo o ID foi Fornecido
+            Agentes agente = db.Agentes.Find(id);
+            //proteção para o caso de não ter sido encontrado qq agente
+            //que tenha o ID fornecido
+            if (agente == null)
             {
-                return HttpNotFound();
+                //n foi encontrado o agente
+                // return HttpNotFound();
+                return RedirectToAction("Index");
             }
-            return View(agentes);
+            //entrega a view os dados do agente encontrado
+            return View(agente);
         }
 
         // POST: Agentes/Delete/5
