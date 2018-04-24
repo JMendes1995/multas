@@ -196,6 +196,7 @@ namespace multas.Controllers
                 // return HttpNotFound();
                 return RedirectToAction("Index");
             }
+
             //entrega a view os dados do agente encontrado
             return View(agente);
         }
@@ -207,23 +208,50 @@ namespace multas.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="agentes"></param>
+        /// <param name="agente"></param>
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agentes)
+        public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agente, HttpPostedFileBase editFotografia)
         {
+            string time = DateTime.Now.ToString("yyyyMMddHHmmss");
+            var novoNome = "agente_"+agente.ID+"_"+time+ ".jpg";
+            var lastPath = Path.Combine(Server.MapPath("~/imagens/imagens/"), agente.Fotografia);
+           
+
+            var path = "";
+            if (editFotografia != null)
+            {//inserir a nova foto no disco rigido
+                //apaga a fotografia anterior do disco
+                System.IO.File.Delete(lastPath);
+                path = Path.Combine(Server.MapPath("~/imagens/imagens/"), novoNome);
+                agente.Fotografia = novoNome;
+            }
+
+     
             if (ModelState.IsValid)
             {
+                try
+                {
+                    db.Entry(agente).State = EntityState.Modified;
+             
+                    //faz o commit
+                    db.SaveChanges();
+
+                    editFotografia.SaveAs(path);
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception) {}
                 //neste caso já existe agente 
                 //apenas quero editar os seus dados
-                db.Entry(agentes).State = EntityState.Modified;
-                //faz o commit
-                db.SaveChanges();
-                return RedirectToAction("Index");
+
             }
-            return View(agentes);
+            return View(agente);
         }
+
+ 
+
 
         // GET: Agentes/Delete/5
         /// <summary>
