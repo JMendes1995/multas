@@ -1,0 +1,9 @@
+Install-Package Microsoft.AspNet.Identity.Samples -Pre 
+
+
+Install-Package Microsoft.AspNet.Identity.EntityFramework
+Install-Package Microsoft.AspNet.Identity.Core
+Install-Package Microsoft.AspNet.Identity.Owin
+
+
+https://www.asp.net/mvc/overview/security
