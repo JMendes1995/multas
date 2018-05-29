@@ -85,14 +85,15 @@ namespace multas.Models
         //atribuitos 'especificos' de um utilizador
         //**************************************************************************************
 
-        [Required(ErrorMessage ="o {0} é de preenchimento obrigatório")]
-        [Display(Name ="Nome próprip")]
-        public string NomeProprio { get; set; }
-        public string Apelido { get; set; }
-        public DateTime? DataDeNascimento { get; set; }
-        public string NIF { get; set; }
+        //[Required(ErrorMessage ="o {0} é de preenchimento obrigatório")]
+        //[Display(Name ="Nome próprip")]
+        //public string NomeProprio { get; set; }
+        //public string Apelido { get; set; }
+        //public DateTime? DataDeNascimento { get; set; }
+        //public string NIF { get; set; }
 
-
+        
+        public Utilizadores utilizador { get; set; }
     }
 
     public class ResetPasswordViewModel

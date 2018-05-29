@@ -15,16 +15,7 @@ namespace multas.Models
         /// </summary>
     public class ApplicationUser : IdentityUser
     {
-        /// <summary>
-        /// os atributos q aqui vao ser adicionados serao adicionados à tabela utilizadores
-        /// </summary>
-        /// <param name="manager"></param>
-        /// <returns></returns>
-        
-        public string NomeProprio { get; set; }
-        public string Apelido { get; set; }
-        public DateTime? DataDeNascimento { get; set; }
-        public string NIF { get; set; }
+
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
@@ -63,7 +54,7 @@ namespace multas.Models
         public virtual DbSet<Viaturas> Viaturas { get; set; }
         public virtual DbSet<Condutores> Condutores { get; set; }
         public virtual DbSet<Agentes> Agentes { get; set; }
-
+        public virtual DbSet<Utilizadores> Utilizadores { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

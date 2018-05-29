@@ -23,8 +23,12 @@ namespace multas.Controllers
 
 
 
-            //recuperar os dados pessoais da pessoa que se autenticou
-            var DadosPessoais = db.Users.Find(User.Identity.GetUserId());
+            //recuperar os dados pessoais da pessoa que se autenticou   
+            var DadosPessoais = db.Utilizadores.Where(
+                uti => uti.NomeRegistoDoUtilizador
+                        .Equals(User.Identity.Name)).FirstOrDefault();
+                        
+                        
             //agora, com estes objeto, ja posso utilizar
             //os dados pessoais de um utilizaodr no meu programa
             //por exemplo :
