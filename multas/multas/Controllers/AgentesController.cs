@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 using multas.Models;
 
 namespace multas.Controllers
@@ -15,154 +16,63 @@ namespace multas.Controllers
     {
         //cria uma variavel que representa a base de dados 
         private ApplicationDbContext db = new ApplicationDbContext();
-
+        
         // GET: Agentes
         public ActionResult Index()
         {
-            //db.Agentes.ToList() -> select * from Agentes;
-            //enviar para a view uma lista com todos os agentes da base de dados
-            var listaDeAgentes=db.Agentes.ToList().OrderBy(a=>a.Nome);
-            return View(listaDeAgentes);
-        }
+
+
+
+            //recuperar os dados pessoais da pessoa que se autenticou
+            var DadosPessoais = db.Users.Find(User.Identity.GetUserId());
+            //agora, com estes objeto, ja posso utilizar
+            //os dados pessoais de um utilizaodr no meu programa
+            //por exemplo :
+            Session["DadosUtilizador"]=DadosPessoais.NomeProprio+" "+DadosPessoais.Apelido+" "+DadosPessoais.DataDeNascimento+" "+DadosPessoais.NIF;
+
+            // (LINQ)db.Agente.ToList() --> em SQL: SELECT * FROM Agentes ORDER BY 
+            // constroi uma lista com os dados de todos os Agentes
+            // e envia-a para a View
+
+            var listaAgentes = db.Agentes.ToList().OrderBy(a => a.Nome);
+
+            return View(listaAgentes);
+       }
 
         // GET: Agentes/Details/5
-        //int? id -> o id pode ser null
         /// <summary>
-        /// 
+        /// Apresenta os detalhes de um Agente
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id"> representa a PK que identifica o Agente </param>
         /// <returns></returns>
         public ActionResult Details(int? id)
         {
-            // proteção para o caso de nao ter sido fornecido um ID valido 
+
+            // int? - significa que pode haver valores nulos
+
+            // protege a execução do método contra a Não existencia de dados
             if (id == null)
             {
-                //instrução original
-                //devolve um erro q n há id
-                //logo n e possivel pesquisar por um agente
                 //return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-                //redirecionar para uma pagina que controlamos
+                // ou não foi introduzido um ID válido,
+                // ou foi introduzido um valor completamente errado
                 return RedirectToAction("Index");
-
-            }
-
-            // procura na BD, i agente cujo o ID foi Fornecido
+}
+            // vai procurar o Agente cujo ID foi fornecido
             Agentes agente = db.Agentes.Find(id);
-            //proteção para o caso de não ter sido encontrado qq agente
-            //que tenha o ID fornecido
-            if (agente == null)
-            {
-                //n foi encontrado o agente
-                // return HttpNotFound();
-                return RedirectToAction("Index");
-            }
-            //entrega a view os dados do agente encontrado
-            return View(agente);
-        }
-
-        // GET: Agentes/Create
-        public ActionResult Create()
-        {
-            //representa a view para se inserir um novo agente
-            return View();
-        }
-
-
-        // POST: Agentes/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="agente"></param>
-            /// <param name="uploadFotografia"></param>
-            /// <returns></returns>
-        [HttpPost]
-        //anotador para proteção por roubo de identidade
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Nome,Esquadra")] Agentes agente,HttpPostedFileBase uploadFotografia)
-        {
-            // escreve os dados ne um novo agente na BD
-            //especificar o id do novo agente
-            //testar se ja registoss
-            //if(db.Agentes.Count() != 0){        }
-
-            int idNovoAgente = 0;
-            try
-            {
-                idNovoAgente = db.Agentes.Max(a => a.ID) + 1;
-            }
-            catch (Exception)
-            {
-
-                idNovoAgente=1;
-            }
-    
-            //guardar o id
-            agente.ID = idNovoAgente;
-            //especificar o nome do ficheiro 
-            string nomeImg = "agente_"+idNovoAgente+".jpg";
-            //validar se  a imagem foi fornecida
-            //var aux
-            var path = "";
-            if (uploadFotografia != null)
-            {
-                //o ficheiro foi fornecido
-                //validar se é uma img
-                //formatar o tamanho da imagem 
-                //criar o caminhao completo até ao sitio onde o ficheiro sera guardado
-                path = Path.Combine(Server.MapPath("~/imagens/imagens/"),nomeImg);
-                //guardar o ficheiro
-                agente.Fotografia = nomeImg;
-            }
-            else
-            {
-                //n foi fornecido qq ficheiro
-                ModelState.AddModelError("","nao foi fornecido uma imagem...");
-                //devolver o controlo a view 
-                return View(agente);
-            }
-            
-                
-            //ModelState.IsValid -> confronta os dados fornecidos da view 
            
-            if (ModelState.IsValid)
-            {
-                try
-                {
-
-      
-                //adiciona o agente à tabela agentes 
-                db.Agentes.Add(agente);
-                //faz commit 
-                db.SaveChanges();
-                //escrever o ficheiro com a fotografia no disco rigido na pasta 'imagens '
-                uploadFotografia.SaveAs(path);
-
-                return RedirectToAction("Index");
-                 
+                       // se o Agente NÃO for encontrado...
+                       if (agente == null)
+                           {
+                               // return HttpNotFound();
+                               return RedirectToAction("Index");
                 }
-                catch (Exception)
-                {
-                    ModelState.AddModelError("", "houve um erro");
-                    //se existir uma classe chamada Erro.cs
-                    //iremos registar os dados do erro
-                    //-cirar um objeto desta classe 
-                    //-atribuir a esse objeto os dados do erro
-                    //      -nome do controller
-                    //      -nome do metodo
-                    //      -data + hora do erro
-                    //      -mensagem do ero(ex)
-                    //      -dados que se tentavam inserir 
-                    //      -outra informação considerados relevantes
-                    //-guardar o objeto na bd
-                    //-notificar um gestor do sistema por email ou por outro meio e os seus dados
-                }
-            } 
-            return View(agente);
-        }
+            
+                        // envia para a View os dados do Agente
+                        return View(agente);
+                 }
+
 
         // GET: Agentes/Edit/5
         /// <summary>
@@ -201,16 +111,22 @@ namespace multas.Controllers
             return View(agente);
         }
 
-        // POST: Agentes/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+        // GET: Agentes/Create
+        public ActionResult Create()
+        {
+            return View();
+        }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="agente"></param>
-        /// <returns></returns>
-        [HttpPost]
+    // POST: Agentes/Edit/5
+    // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+    // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="agente"></param>
+    /// <returns></returns>
+    [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agente, HttpPostedFileBase editFotografia)
         {

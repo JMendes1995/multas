@@ -149,7 +149,14 @@ namespace multas.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    NomeProprio = model.NomeProprio,
+                    Apelido = model.Apelido,
+                    DataDeNascimento = model.DataDeNascimento,
+                    NIF = model.NIF
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

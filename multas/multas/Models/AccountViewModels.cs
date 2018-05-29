@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace multas.Models
@@ -59,6 +60,10 @@ namespace multas.Models
         public bool RememberMe { get; set; }
     }
 
+    /// <summary>
+    /// classe responsavel por levar os dados da view Register
+    /// para o controller Account
+    /// </summary>
     public class RegisterViewModel
     {
         [Required]
@@ -76,6 +81,18 @@ namespace multas.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+        //**************************************************************************************
+        //atribuitos 'especificos' de um utilizador
+        //**************************************************************************************
+
+        [Required(ErrorMessage ="o {0} é de preenchimento obrigatório")]
+        [Display(Name ="Nome próprip")]
+        public string NomeProprio { get; set; }
+        public string Apelido { get; set; }
+        public DateTime? DataDeNascimento { get; set; }
+        public string NIF { get; set; }
+
+
     }
 
     public class ResetPasswordViewModel
