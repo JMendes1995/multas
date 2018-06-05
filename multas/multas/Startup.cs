@@ -16,14 +16,14 @@ namespace multas
         {
             ConfigureAuth(app);
             //invocar o metodo para iniciar a config
-            iniciaAplicacao();
+            IniciaAplicacao();
         }
 
         /// <summary>
         /// cria, caso não existam, as Roles de suporte à aplicação: agentes, condutores
         /// cria, nesse caso, também, um utilizador...
         /// </summary>
-        private void iniciaAplicacao()
+        private void IniciaAplicacao()
         {
 
             ApplicationDbContext db = new ApplicationDbContext();
@@ -40,7 +40,15 @@ namespace multas
                 role.Name = "Agentes";
                 roleManager.Create(role);
             }
-
+            // criar a Role 'GestaoPessoal'
+            if (!roleManager.RoleExists("GestaoPessoal"))
+            {
+                // não existe a 'role'
+                // então, criar essa role
+                var role = new IdentityRole();
+                role.Name = "GestaoPessoal";
+                roleManager.Create(role);
+            }
 
 
             // criar um utilizador 'Agentes'
@@ -57,6 +65,20 @@ namespace multas
                 var result1 = userManager.AddToRole(user.Id, "Agentes");
             }
 
+
+            // criar um utilizador 'GestaoPessoal'-andre
+            user = new ApplicationUser();
+            user.UserName = "andre@mail.pt";
+            user.Email = "andre@mail.pt";
+            //user.Nome = "Luís Freitas";
+             userPWD = "123A_s";
+             chkUser = userManager.Create(user, userPWD);
+
+            //Adicionar o Utilizador à respetiva Role-GestaoPessoal-
+            if (chkUser.Succeeded)
+            {
+                var result1 = userManager.AddToRole(user.Id, "GestaoPessoal");
+            }
 
 
         }

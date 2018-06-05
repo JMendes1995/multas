@@ -12,27 +12,24 @@ using multas.Models;
 
 namespace multas.Controllers
 {
+    [Authorize(Roles= "Agentes,GestaoPessoal")] //só pessoas autenticadas é que podem executar estes recursos
     public class AgentesController : Controller
     {
         //cria uma variavel que representa a base de dados 
         private ApplicationDbContext db = new ApplicationDbContext();
         
         // GET: Agentes
+        [AllowAnonymous]//apesat de haver restrições de acesso esta linha permite os ut anonimos verem o con
         public ActionResult Index()
         {
-
-
-
             //recuperar os dados pessoais da pessoa que se autenticou   
             var DadosPessoais = db.Utilizadores.Where(
                 uti => uti.NomeRegistoDoUtilizador
                         .Equals(User.Identity.Name)).FirstOrDefault();
-                        
-                        
             //agora, com estes objeto, ja posso utilizar
             //os dados pessoais de um utilizaodr no meu programa
             //por exemplo :
-            Session["DadosUtilizador"]=DadosPessoais.NomeProprio+" "+DadosPessoais.Apelido+" "+DadosPessoais.DataDeNascimento+" "+DadosPessoais.NIF;
+            //Session["DadosUtilizador"]=DadosPessoais.NomeProprio+" "+DadosPessoais.Apelido+" "+DadosPessoais.DataDeNascimento+" "+DadosPessoais.NIF;
 
             // (LINQ)db.Agente.ToList() --> em SQL: SELECT * FROM Agentes ORDER BY 
             // constroi uma lista com os dados de todos os Agentes
@@ -80,10 +77,12 @@ namespace multas.Controllers
 
         // GET: Agentes/Edit/5
         /// <summary>
-        /// 
+        /// apresentar na view os dados de um agente para uma eventual edição
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">identificar o agente a editar</param>
         /// <returns></returns>
+        
+
         public ActionResult Edit(int? id)
         {
 
@@ -111,11 +110,18 @@ namespace multas.Controllers
                 return RedirectToAction("Index");
             }
 
+            //existe o agente
+            if (User.Identity.Name.Equals(agente.UserName) || User.IsInRole("GestaoPessoal"))
+            {
+                return View(agente);
+            }
+
             //entrega a view os dados do agente encontrado
-            return View(agente);
+            return RedirectToAction("Index");
         }
 
         // GET: Agentes/Create
+        [Authorize(Roles = "GestaoPessoal")]
         public ActionResult Create()
         {
             return View();
@@ -126,51 +132,65 @@ namespace multas.Controllers
     // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
 
     /// <summary>
-    /// 
+    /// concretiza a edição dos dadosde um gente
     /// </summary>
-    /// <param name="agente"></param>
+    /// <param name="agente">dados do agente</param>
     /// <returns></returns>
-    [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia")] Agentes agente, HttpPostedFileBase editFotografia)
+       
+        public ActionResult Edit([Bind(Include = "ID,Nome,Esquadra,Fotografia,UserName")] Agentes agente, HttpPostedFileBase editFotografia)
         {
-            string time = DateTime.Now.ToString("yyyyMMddHHmmss");
-            var novoNome = "agente_"+agente.ID+"_"+time+ ".jpg";
-            var lastPath = Path.Combine(Server.MapPath("~/imagens/imagens/"), agente.Fotografia);
-           
-
-            var path = "";
-            if (editFotografia != null)
-            {//inserir a nova foto no disco rigido
-                //apaga a fotografia anterior do disco
-                System.IO.File.Delete(lastPath);
-                path = Path.Combine(Server.MapPath("~/imagens/imagens/"), novoNome);
-                agente.Fotografia = novoNome;
-            }
-
-     
-            if (ModelState.IsValid)
+            //se o utilizador pertence a role gestaoPessoal, pode efetuar a edição,
+            //sem qualquer restrição  
+            //se o ut nao pertence à roe  acima referida  e não é dono dos dados nada se pode fazer
+            //se o ut nao pertence a role e é domo dos dados
+            
+                //1-pesquisar os dados antigos do agente na bd
+                //2-substituir nos dados novos, o valor da 'esquadra' pelo dados antigos da  'esquadra'
+                //3-guardar os dados na bd
+                //nota:claro que a validação do nome e da fotografia também tem de acontecer
+            if (User.Identity.Name.Equals(agente.UserName) || User.IsInRole("GestaoPessoal"))
             {
-                try
-                {
-                    db.Entry(agente).State = EntityState.Modified;
-             
-                    //faz o commit
-                    db.SaveChanges();
+                string time = DateTime.Now.ToString("yyyyMMddHHmmss");
+                var novoNome = "agente_" + agente.ID + "_" + time + ".jpg";
+                var lastPath = Path.Combine(Server.MapPath("~/imagens/imagens/"), agente.Fotografia);
 
-                    editFotografia.SaveAs(path);
 
-                    return RedirectToAction("Index");
+                var path = "";
+                if (editFotografia != null)
+                {//inserir a nova foto no disco rigido
+                 //apaga a fotografia anterior do disco
+                    System.IO.File.Delete(lastPath);
+                    path = Path.Combine(Server.MapPath("~/imagens/imagens/"), novoNome);
+                    agente.Fotografia = novoNome;
                 }
-                catch (Exception) {}
-                //neste caso já existe agente 
-                //apenas quero editar os seus dados
 
+
+                if (ModelState.IsValid)
+                {
+                    try
+                    {
+                        db.Entry(agente).State = EntityState.Modified;
+                   
+                        //faz o commit
+                        db.SaveChanges();
+
+                        editFotografia.SaveAs(path);
+
+                        return RedirectToAction("Index");
+                    }
+                    catch (Exception) { }
+                    //neste caso já existe agente 
+                    //apenas quero editar os seus dados
+
+                }
+                return View(agente);
             }
-            return View(agente);
+            return RedirectToAction("Index");
         }
 
- 
+
 
 
         // GET: Agentes/Delete/5
@@ -180,6 +200,8 @@ namespace multas.Controllers
         /// </summary>
         /// <param name="id">identificador doo agente</param>
         /// <returns></returns>
+        /// 
+        [Authorize(Roles = "GestaoPessoal")]
         public ActionResult Delete(int? id)
         {
 
@@ -213,6 +235,7 @@ namespace multas.Controllers
         // POST: Agentes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "GestaoPessoal")]
         public ActionResult DeleteConfirmed(int id)
         {
             Agentes agentes = db.Agentes.Find(id);
